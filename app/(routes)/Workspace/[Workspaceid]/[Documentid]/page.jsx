@@ -1,7 +1,17 @@
-export default function WorkspaceDocument() {
+"use client";
+import { useEffect } from "react";
+import SideNavigationBar from "../../_components/NavigationBarSide";
+
+export default function WorkspaceDocument({ params }) {
+  useEffect(() => {
+    console.log(params);
+  }, [params]);
   return (
     <div>
-      <h1>Workspace Document</h1>
+      <div>
+        <SideNavigationBar params={params} />
+      </div>
+      <div className="md:ml-72">Document</div>
     </div>
   );
 }
