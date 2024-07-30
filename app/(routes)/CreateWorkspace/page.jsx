@@ -2,27 +2,28 @@
 import Image from "next/image";
 import coverImageWorkspace from "../../../public/cover.png";
 import { Button } from "@/components/ui/button";
-import { SmilePlus } from "lucide-react";
+import { Edit, SmilePlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import Link from "next/link";
+import CoverPicker from "@/app/_components/CoverPicker";
 
 export default function CreateWorkspace() {
   const [workspaceName, setWorkspaceName] = useState();
+  const [coverImage, setCoverImage] = useState(coverImageWorkspace);
   return (
     <div className="lg:w-[50%] md:w-[65%] w-[80%] mx-auto flex flex-col items-start justify-center mt-36 shadow-2xl">
       <div className="w-full relative">
-        <div className="w-full flex items-center justify-center h-full absolute z-20">
-          <h1 className="font-bold text-lg hidden hover:flex">
-            Change Cover Image
-          </h1>
-        </div>
+        <CoverPicker setNewCover={(v) => setCoverImage(v)}>
+          <Edit className="cursor-pointer absolute ml-96 mt-6" />
+        </CoverPicker>
+
         <Image
-          src={coverImageWorkspace}
+          src={coverImage}
           alt=""
           width={500}
           height={200}
-          className="w-full h-[150px] rounded-t-2xl object-cover hover:opacity-45"
+          className="w-full h-[150px] rounded-t-2xl object-cover cursor-pointer"
         />
       </div>
       <div className="p-12 flex flex-col gap-4">
