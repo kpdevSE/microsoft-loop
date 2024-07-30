@@ -13,26 +13,58 @@ import {
 } from "firebase/firestore";
 import { db } from "@/config/firebaseConfig";
 import { useEffect, useState } from "react";
+import DocumentList from "./DocumentList";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function SideNavigationBar({ params }) {
-  const [documentList, setDocumentList] = useState();
+  const [documentList, setDocumentList] = useState([]);
+  const { user } = useUser();
+
+  const router = useRouter();
 
   useEffect(() => {
-    params && getDocumentList();
+    params && GetDocumentList();
   }, [params]);
 
-  const getDocumentList = () => {
-    const qu = query(
+  /**
+   * Used to get Document List
+   */
+  const GetDocumentList = () => {
+    const q = query(
       collection(db, "workspaceDocuments"),
-      where("workspaceId", "==", Number(params?.workspaceId))
+      where("workspaceId", "==", Number(params?.workspaceid))
     );
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      setDocumentList([]);
 
-    const unsubscribe = onSnapshot(qu, (QuerySnapshot) => {
-      QuerySnapshot.forEach((doc) => {
-        console.log(doc.data());
+      querySnapshot.forEach((doc) => {
         setDocumentList((documentList) => [...documentList, doc.data()]);
+        console.log(documentList);
       });
     });
+  };
+
+  const CreateNewDocument = async () => {
+    const docId = uuid4();
+    await setDoc(doc(db, "workspaceDocuments", docId.toString()), {
+      workspaceId: Number(params?.workspaceId),
+      createdBy: user?.primaryEmailAddress?.emailAddress,
+      coverImage: null,
+      emoji: null,
+      id: docId,
+      documentName: "Untitled Document",
+      documentoutput: [],
+    });
+
+    await setDoc(doc(db, "documentOutput", docId.toString()), {
+      docId: docId,
+      output: [],
+    });
+
+    setLoading(false);
+    console.log("Data inserted Successfully");
+    router.replace("/Workspace/" + params?.workspaceId + "/" + docId);
   };
 
   return (
@@ -51,9 +83,13 @@ export default function SideNavigationBar({ params }) {
       </div>
       <div className="flex items-center justify-between w-[95%] mx-auto">
         <h1 className="font-bold">Workspace Name</h1>
-        <Button size="sm">+</Button>
+        <Button size="sm" onClick={CreateNewDocument}>
+          +
+        </Button>
       </div>
-      <div></div>
+      <div>
+        <DocumentList documentList={documentList} />
+      </div>
     </div>
   );
 }
